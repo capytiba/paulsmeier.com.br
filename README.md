@@ -15,4 +15,4 @@ Esse sou eu com minha esposa, Tabea, no Natal de 2023.
 
 ---
 
-[^1] _Esse site estático está hospedado no Github Pages._
+[^1]: _Esse site estático está hospedado no Github Pages._
