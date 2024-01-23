@@ -3,6 +3,6 @@
 
 Ainda estou aprendendo, não espere muito não. Já foi super difícil configurar as coisas até aqui. 
 
-[Esse é um link para minha página](david)
+[Esse é um teste de link para outra página](davidbreusmeier)
 
 _Esse site está hospedado no Github Pages._
