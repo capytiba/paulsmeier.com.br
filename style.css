@@ -1,0 +1,265 @@
+/* --- Variables --- */
+:root {
+    --bg-color: #0f172a; /* Deep slate blue/black */
+    --text-main: #e2e8f0; /* Light slate for headings */
+    --text-muted: #94a3b8; /* Muted slate for paragraphs */
+    --accent-color: #3b82f6; /* Industrial Steel Blue */
+    --card-hover: rgba(30, 41, 59, 0.5); /* Subtle highlight on hover */
+}
+
+/* --- Base Styles --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-muted);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+    color: var(--text-main);
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+/* --- Layout Wrapper (Mobile First) --- */
+.layout-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* --- Sidebar / Intro --- */
+.sidebar {
+    margin-bottom: 4rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    margin-bottom: 0.5rem;
+}
+
+h2 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+.bio {
+    max-width: 400px;
+    margin-bottom: 2rem;
+}
+
+/* Page Navigation (Hidden on mobile, mimics her lines) */
+.page-nav {
+    display: none; 
+    margin-top: 3rem;
+}
+
+.page-nav ul {
+    list-style: none;
+}
+
+.page-nav a {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.page-nav .line {
+    display: inline-block;
+    width: 30px;
+    height: 1px;
+    background-color: var(--text-muted);
+    margin-right: 15px;
+    transition: all 0.3s ease;
+}
+
+.page-nav a.active, .page-nav a:hover {
+    color: var(--text-main);
+}
+
+.page-nav a.active .line, .page-nav a:hover .line {
+    width: 60px;
+    background-color: var(--text-main);
+}
+
+/* Language Selector */
+.lang-selector {
+    margin-top: 2rem;
+    display: flex;
+    gap: 15px;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.lang-selector a:hover, .lang-selector a.active {
+    color: var(--accent-color);
+}
+
+/* --- Content / Timeline --- */
+.section-block {
+    margin-bottom: 4rem;
+}
+
+.experience-card {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    margin-bottom: 1rem;
+    /* Pulling it slightly left so the text aligns visually */
+    margin-left: -1.5rem; 
+    margin-right: -1.5rem;
+}
+
+/* Hover effect mimicking her site */
+.experience-card:hover {
+    background-color: var(--card-hover);
+}
+
+.experience-card:hover h3 {
+    color: var(--accent-color);
+}
+
+.exp-date {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.exp-details h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.company {
+    color: var(--text-main);
+}
+
+/* --- Desktop Layout (The Magic Split Screen) --- */
+@media (min-width: 1024px) {
+    .layout-wrapper {
+        display: flex;
+        justify-content: space-between;
+        gap: 2rem;
+        padding: 4rem 6rem;
+    }
+
+    /* Make the sidebar sticky */
+    .sidebar {
+        position: sticky;
+        top: 0;
+        /* Viewport height minus padding */
+        max-height: 100vh; 
+        width: 45%;
+        padding-top: 4rem;
+        padding-bottom: 4rem;
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .content {
+        width: 50%;
+        padding-top: 4rem;
+        padding-bottom: 4rem;
+    }
+
+    .page-nav {
+        display: block;
+    }
+
+    .experience-card {
+        grid-template-columns: 1fr 3fr;
+        gap: 1rem;
+    }
+}
+/* --- Efeito de Brilho do Mouse (Mouse Glow) --- */
+.mouse-glow {
+    pointer-events: none; /* Garante que o brilho não bloqueie cliques */
+    position: fixed;
+    inset: 0;
+    z-index: 30; /* Fica acima do fundo, mas abaixo do texto */
+    /* Cria um gradiente radial usando o azul industrial. Fica transparente nas bordas */
+    background: radial-gradient(
+        600px circle at var(--x, 50%) var(--y, 50%), 
+        rgba(59, 130, 246, 0.08), 
+        transparent 40%
+    );
+}
+
+/* Garante que o texto e os cards fiquem acima do brilho */
+.layout-wrapper {
+    position: relative;
+    z-index: 40;
+}
+
+/* --- Ajustes da Seção Sobre --- */
+.about-text {
+    margin-bottom: 1.5rem;
+}
+
+/* --- Ajustes do Card de Projeto (Imagem à esquerda) --- */
+.project-image-container {
+    padding-top: 0.25rem;
+}
+
+.project-thumb {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    border-radius: 4px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: border-color 0.3s ease;
+}
+
+.experience-card:hover .project-thumb {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* --- Títulos das seções para Mobile --- */
+.mobile-section-title {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+    position: sticky;
+    top: 0;
+    background-color: rgba(15, 23, 42, 0.9); /* Mesma cor do fundo, mas translúcido */
+    backdrop-filter: blur(8px);
+    padding: 1rem 0;
+    z-index: 50;
+}
+
+/* Esconde os títulos das seções no Desktop (já que temos o menu lateral) */
+@media (min-width: 1024px) {
+    .mobile-section-title {
+        display: none;
+    }
+}
