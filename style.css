@@ -15,7 +15,7 @@
 }
 
 body {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Atkinson Hyperlegible', system-ui, sans-serif;
     background-color: var(--bg-color);
     color: var(--text-muted);
     line-height: 1.6;
@@ -36,23 +36,25 @@ a {
 .layout-wrapper {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 1rem;
+    position: relative;
+    z-index: 40;
 }
 
 /* --- Sidebar / Intro --- */
 .sidebar {
-    margin-bottom: 4rem;
+    margin-bottom: 1rem;
 }
 
 h1 {
-    font-size: 2.5rem;
+    font-size: 3rem;
     font-weight: 700;
     letter-spacing: -0.025em;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0rem;
 }
 
 h2 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 500;
     margin-bottom: 1rem;
     color: var(--text-main);
@@ -61,12 +63,14 @@ h2 {
 .bio {
     max-width: 400px;
     margin-bottom: 2rem;
+    font-size: 1.3rem;
+    line-height: 1.8rem;
 }
 
 /* Page Navigation (Hidden on mobile, mimics her lines) */
 .page-nav {
     display: none; 
-    margin-top: 3rem;
+    margin-top: 2rem;
 }
 
 .page-nav ul {
@@ -102,11 +106,12 @@ h2 {
 
 /* Language Selector */
 .lang-selector {
-    margin-top: 2rem;
+    margin-top: 0rem;
     display: flex;
     gap: 15px;
     font-weight: 700;
     font-size: 0.9rem;
+    margin-bottom: 0rem;
 }
 
 .lang-selector a:hover, .lang-selector a.active {
@@ -159,33 +164,38 @@ h2 {
     color: var(--text-main);
 }
 
+/* --- Efeito de Brilho do Mouse (Mobile: Oculto) --- */
+.mouse-glow {
+    display: none; 
+}
+
 /* --- Desktop Layout (The Magic Split Screen) --- */
 @media (min-width: 1024px) {
     .layout-wrapper {
         display: flex;
         justify-content: space-between;
         gap: 2rem;
-        padding: 4rem 6rem;
+        padding: 0rem 2rem 0rem;
     }
 
     /* Make the sidebar sticky */
     .sidebar {
         position: sticky;
         top: 0;
-        /* Viewport height minus padding */
         max-height: 100vh; 
         width: 45%;
         padding-top: 4rem;
-        padding-bottom: 4rem;
+        padding-bottom: 2rem;
         margin-bottom: 0;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        overflow: hidden;
     }
 
-    .content {
+    .content {  
         width: 50%;
-        padding-top: 4rem;
+        padding-top: 3rem;
         padding-bottom: 4rem;
     }
 
@@ -197,26 +207,23 @@ h2 {
         grid-template-columns: 1fr 3fr;
         gap: 1rem;
     }
-}
-/* --- Efeito de Brilho do Mouse (Mouse Glow) --- */
-.mouse-glow {
-    pointer-events: none; /* Garante que o brilho não bloqueie cliques */
-    position: fixed;
-    inset: 0;
-    z-index: 30; /* Fica acima do fundo, mas abaixo do texto */
-    /* Cria um gradiente radial usando o azul industrial. Fica transparente nas bordas */
-    background: radial-gradient(
-        600px circle at var(--x, 50%) var(--y, 50%), 
-        rgba(59, 130, 246, 0.08), 
-        transparent 40%
-    );
+
+
+    /* --- Efeito de Brilho do Mouse (Desktop: Ativo) --- */
+    .mouse-glow {
+        display: block; /* Turns the element back on for desktop */
+        pointer-events: none; 
+        position: fixed;
+        inset: 0;
+        z-index: 30; 
+        background: radial-gradient(
+            600px circle at var(--x, 50%) var(--y, 50%), 
+            rgba(59, 130, 246, 0.08), 
+            transparent 40%
+        );
+    }
 }
 
-/* Garante que o texto e os cards fiquem acima do brilho */
-.layout-wrapper {
-    position: relative;
-    z-index: 40;
-}
 
 /* --- Ajustes da Seção Sobre --- */
 .about-text {
@@ -263,3 +270,29 @@ h2 {
         display: none;
     }
 }
+
+/*
+.atkinson-hyperlegible-regular {
+  font-family: "Atkinson Hyperlegible", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.atkinson-hyperlegible-bold {
+  font-family: "Atkinson Hyperlegible", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.atkinson-hyperlegible-regular-italic {
+  font-family: "Atkinson Hyperlegible", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.atkinson-hyperlegible-bold-italic {
+  font-family: "Atkinson Hyperlegible", sans-serif;
+  font-weight: 700;
+  font-style: italic;
+}
+*/
