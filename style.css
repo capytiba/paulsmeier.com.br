@@ -1,6 +1,6 @@
 /* --- Variables --- */
 :root {
-    --bg-color: #0f172a; /* Deep slate blue/black */
+    --bg-color: #0B032D; /* Deep slate blue/black */
     --text-main: #e2e8f0; /* Light slate for headings */
     --text-muted: #94a3b8; /* Muted slate for paragraphs */
     --accent-color: #3b82f6; /* Industrial Steel Blue */
@@ -123,6 +123,21 @@ h2 {
     margin-bottom: 4rem;
 }
 
+.card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.card-link::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10; 
+}
+
 .experience-card {
     display: grid;
     grid-template-columns: 1fr;
@@ -134,6 +149,7 @@ h2 {
     /* Pulling it slightly left so the text aligns visually */
     margin-left: -1.5rem; 
     margin-right: -1.5rem;
+    position: relative;
 }
 
 /* Hover effect mimicking her site */
@@ -193,10 +209,40 @@ h2 {
         overflow: hidden;
     }
 
+    .sidebar_pages {
+        position: sticky;
+        top: 0;
+        max-height: 100vh; 
+        width: 35%;
+        padding-top: 4rem;
+        padding-bottom: 2rem;
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+    }
+
     .content {  
         width: 50%;
         padding-top: 3rem;
         padding-bottom: 4rem;
+    }
+
+    .content_pages {  
+        width: 60%;
+        padding-top: 3rem;
+        padding-bottom: 4rem;
+    }
+
+    .pages_image {
+        width: 100%;
+        padding: 2%;
+        max-width: 2000px;
+        height: auto;
+        border-radius: 4px;
+        border: 0px solid rgba(255, 255, 255, 0.1);
+        transition: border-color 0.3s ease;
     }
 
     .page-nav {
@@ -240,7 +286,7 @@ h2 {
     max-width: 200px;
     height: auto;
     border-radius: 4px;
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    border: 0px solid rgba(255, 255, 255, 0.1);
     transition: border-color 0.3s ease;
 }
 
