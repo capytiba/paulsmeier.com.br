@@ -213,7 +213,39 @@
             sections.forEach((section) => {
                 observer.observe(section);
             });
-        }); 
+        });
+        
+        window.addEventListener('scroll', () => {
+            // Calculate total scrollable height
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            
+            // Get scroll progress as a fraction between 0 and 1
+            const scrollFraction = docHeight > 0 ? scrollTop / docHeight : 0;
+            
+            // Define your color checkpoints
+            // Top Colors (Scroll = 0)
+            const topColor1 = { r: 15, g: 23, b: 42 };    // #0f172a
+            const topColor2 = { r: 30, g: 27, b: 75 };    // #1e1b4b
+            
+            // Bottom Colors (Scroll = 100%) -> Infusing your Industrial Steel Blue
+            const bottomColor1 = { r: 17, g: 24, b: 39 };  // Deeper charcoal/slate
+            const bottomColor2 = { r: 30, g: 58, b: 138 }; // Deep Industrial Blue (#1e3a8a)
+
+            // Linearly interpolate (lerp) between the top and bottom colors based on scroll
+            const r1 = Math.round(topColor1.r + (bottomColor1.r - topColor1.r) * scrollFraction);
+            const g1 = Math.round(topColor1.g + (bottomColor1.g - topColor1.g) * scrollFraction);
+            const b1 = Math.round(topColor1.b + (bottomColor1.b - topColor1.b) * scrollFraction);
+
+            const r2 = Math.round(topColor2.r + (bottomColor2.r - topColor2.r) * scrollFraction);
+            const g2 = Math.round(topColor2.g + (bottomColor2.g - topColor2.g) * scrollFraction);
+            const b2 = Math.round(topColor2.b + (bottomColor2.b - topColor2.b) * scrollFraction);
+
+            // Update the CSS variables dynamically
+            document.body.style.setProperty('--bg-color-1', `rgb(${r1}, ${g1}, ${b1})`);
+            document.body.style.setProperty('--bg-color-2', `rgb(${r2}, ${g2}, ${b2})`);
+        });
+        
     </script>
 
 </body>

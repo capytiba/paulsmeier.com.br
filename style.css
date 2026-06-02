@@ -14,13 +14,44 @@
     padding: 0;
 }
 
+/* Note: For the CSS transition on variables to look ultra-smooth in modern browsers, 
+  we explicitly register them at the top of your CSS file:
+*/
+@property --bg-color-1 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #0f172a;
+}
+
+@property --bg-color-2 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #1e1b4b;
+}
+
 body {
     font-family: 'Atkinson Hyperlegible', system-ui, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-muted);
+    /* Define initial background colors (Top of the page) */
+    --bg-color-1: #0f172a; /* Your current deep dark slate background */
+    --bg-color-2: #1e1b4b; /* A subtle deep indigo/navy tint */
+
+    /* Apply the gradient using the variables */
+    background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2));
+    background-attachment: fixed; /* Keeps the gradient pinned while content scrolls */
+
+    /* Smooth transition effect for when the JavaScript updates the variables */
+    transition: --bg-color-1 0.5s ease, --bg-color-2 0.5s ease;
+
+    /* Ensure text remains readable */
+    color: #f8fafc; 
+    margin: 0;
+    min-height: 100vh;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
 }
+
+
+
 
 h1, h2, h3 {
     color: var(--text-main);
