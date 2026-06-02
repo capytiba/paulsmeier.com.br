@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4-Corner Gradient Generator</title>
+    <style>
+        :root {
+            --bg-color: #0f0f11;
+            --card-bg: #16161a;
+            --text-color: #e1e1e6;
+            --border-color: #242429;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0 0 15px 0;
+            font-weight: 600;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        /* 4-Corner Canvas Preview */
+        #gradient-preview {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Compact Workspace Grid */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        @media (min-width: 650px) {
+            .workspace {
+                grid-template-columns: 1fr auto 1fr;
+                align-items: center;
+            }
+        }
+
+        /* Centralized Wheel Column */
+        .wheel-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+        }
+
+        canvas {
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .active-indicator {
+            font-size: 0.85rem;
+            color: #a8a8b3;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* Target Marker Rings */
+        .color-marker {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 2px solid white;
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 4px rgba(0,0,0,0.8);
+            transition: border-color 0.2s;
+        }
+        
+        /* Give each corner marker a clear identifier matching its quadrant */
+        #marker-tl { border-color: #ff453a; }
+        #marker-tr { border-color: #30d158; }
+        #marker-bl { border-color: #0a84ff; }
+        #marker-br { border-color: #bf5af2; }
+
+        /* Sliders Corner Controls */
+        .controls-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .corner-panel {
+            background: #1f1f23;
+            border-radius: 8px;
+            padding: 10px 12px;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .corner-panel.active {
+            background: #26262b;
+        }
+        
+        /* Visual mapping indicators corresponding to markers */
+        #panel-tl { border-left-color: #ff453a; }
+        #panel-tr { border-left-color: #30d158; }
+        #panel-bl { border-left-color: #0a84ff; }
+        #panel-br { border-left-color: #bf5af2; }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .hex-display {
+            font-family: monospace;
+            color: #00e676;
+        }
+
+        .slider-row {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-bottom: 6px;
+        }
+
+        .slider-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .slider-row label {
+            font-size: 0.75rem;
+            color: #a8a8b3;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: #2d2d34;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e1e1e6;
+            cursor: pointer;
+        }
+
+        /* Output Box */
+        .output-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            word-break: break-all;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>4-Corner Gradient Tool</h1>
+
+    <div class="container">
+        <canvas id="gradient-preview" width="400" height="200"></canvas>
+
+        <div class="workspace">
+            
+            <div class="controls-column">
+                <div class="corner-panel active" id="panel-tl" onclick="setActiveCorner('tl')">
+                    <div class="panel-header"><span>Top-Left Corner</span><span class="hex-display" id="hex-tl">#FF0000</span></div>
+                    <div class="slider-container" onclick="event.stopPropagation()">
+                        <div class="slider-row"><label>Saturation <span id="txt-sat-tl">100%</span></label><input type="range" id="sat-tl" min="0" max="100" value="100"></div>
+                        <div class="slider-row"><label>Brightness <span id="txt-val-tl">100%</span></label><input type="range" id="val-tl" min="0" max="100" value="100"></div>
+                        <div class="slider-row"><label>Warmth <span id="txt-warm-tl">0</span></label><input type="range" id="warm-tl" min="-50" max="50" value="0"></div>
+                    </div>
+                </div>
+                
+                <div class="corner-panel" id="panel-bl" onclick="setActiveCorner('bl')">
+                    <div class="panel-header"><span>Bottom-Left Corner</span><span class="hex-display" id="hex-bl">#00FFFF</span></div>
+                    <div class="slider-container" onclick="event.stopPropagation()">
+                        <div class="slider-row"><label>Saturation <span id="txt-sat-bl">100%</span></label><input type="range" id="sat-bl" min="0" max="100" value="100"></div>
+                        <div class="slider-row"><label>Brightness <span id="txt-val-bl">100%</span></label><input type="range" id="val-bl" min="0" max="100" value="100"></div>
+                        <div class="slider-row"><label>Warmth <span id="txt-warm-bl">0</span></label><input type="range" id="warm-bl" min="-50" max="50" value="0"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wheel-column">
+                <div class="active-indicator">Editing: <span id="active-title" style="font-weight:bold; color:#ff453a;">Top-Left</span></div>
+                <div class="canvas-container">
+                    <canvas id="hue-ring" width="150" height="150"></canvas>
+                    <div class="color-marker" id="marker-tl"></div>
+                    <div class="color-marker" id="marker-tr"></div>
+                    <div class="color-marker" id="marker-bl"></div>
+                    <div class="color-marker" id="marker-br"></div>
+                </div>
+                <div class="active-indicator" style="font-size:0.75rem;">Click ring to pick color,<br>or select panel to switch corners.</div>
+            </div>
+
+            <div class="controls-column">
+                <div class="corner-panel" id="panel-tr" onclick="setActiveCorner('tr')">
+                    <div class="panel-header"><span>Top-Right Corner</span><span class="hex-display" id="hex-tr">#00FF00</span></div>
+                    <div class="slider-container" onclick="event.stopPropagation()">
+                        <div class="slider-row"><label>Saturation <span id="txt-sat-tr">100%</span></label><input type="range" id="sat-tr" min="0" max="100" value="100"></div>
+                        <div class="slider-row"><label>Brightness <span id="txt-val-tr">100%</span></label><input type="range" id="val-tr" min="0" max="100" value="100"></div>
+                        <div class="slider-row"><label>Warmth <span id="txt-warm-tr">0</span></label><input type="range" id="warm-tr" min="-50" max="50" value="0"></div>
+                    </div>
+                </div>
+                
+                <div class="corner-panel" id="panel-br" onclick="setActiveCorner('br')">
+                    <div class="panel-header"><span>Bottom-Right Corner</span><span class="hex-display" id="hex-br">#0000FF</span></div>
+                    <div class="slider-container" onclick="event.stopPropagation()">
+                        <div class="slider-row"><label>Saturation <span id="txt-sat-br">100%</span></label><input type="range" id="sat-br" min="0" max="100" value="100"></div>
+                        <div class="slider-row"><label>Brightness <span id="txt-val-br">100%</span></label><input type="range" id="val-br" min="0" max="100" value="100"></div>
+                        <div class="slider-row"><label>Warmth <span id="txt-warm-br">0</span></label><input type="range" id="warm-br" min="-50" max="50" value="0"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="output-box" id="css-output">
+            Loading color values...
+        </div>
+    </div>
+
+    <script>
+        // Track states for all 4 corners [cite: 1]
+        const state = {
+            tl: { hue: 0, sat: 100, val: 100, warmth: 0, hex: '#ff0000', label: 'Top-Left', color: '#ff453a' },
+            tr: { hue: 120, sat: 100, val: 100, warmth: 0, hex: '#00ff00', label: 'Top-Right', color: '#30d158' },
+            bl: { hue: 180, sat: 100, val: 100, warmth: 0, hex: '#00ffff', label: 'Bottom-Left', color: '#0a84ff' },
+            br: { hue: 240, sat: 100, val: 100, warmth: 0, hex: '#0000ff', label: 'Bottom-Right', color: '#bf5af2' }
+        };
+
+        let activeCorner = 'tl';
+        const RING_THICKNESS = 12;
+
+        // Initialize shared hue ring circumference with anti-aliasing [cite: 9, 18, 19]
+        initSharedHueRing();
+        
+        // Setup control parameters
+        const corners = ['tl', 'tr', 'bl', 'br'];
+        corners.forEach(c => {
+            updateMarkerPosition(c, state[c].hue);
+            setupSliderListeners(c);
+        });
+        
+        updateColors();
+
+        function setActiveCorner(cornerId) {
+            activeCorner = cornerId;
+            corners.forEach(c => document.getElementById(`panel-${c}`).classList.remove('active'));
+            document.getElementById(`panel-${cornerId}`).classList.add('active');
+            
+            const titleEl = document.getElementById('active-title');
+            titleEl.innerText = state[cornerId].label;
+            titleEl.style.color = state[cornerId].color;
+        }
+
+        function initSharedHueRing() {
+            const canvas = document.getElementById('hue-ring');
+            const ctx = canvas.getContext('2d');
+            const center = canvas.width / 2;
+            const outerRadius = center - 2;
+            const innerRadius = outerRadius - RING_THICKNESS;
+            
+            const imgData = ctx.createImageData(canvas.width, canvas.height);
+            const data = imgData.data;
+            const aaWidth = 1.5; // Smooth anti-aliased edge window [cite: 20]
+
+            for (let x = 0; x < canvas.width; x++) {
+                for (let y = 0; y < canvas.height; y++) {
+                    const dx = x - center;
+                    const dy = y - center;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance >= (innerRadius - aaWidth) && distance <= (outerRadius + aaWidth)) {
+                        let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                        if (angle < 0) angle += 360;
+                        
+                        const rgb = hslToRgb(angle / 360, 1, 0.5);
+                        const index = (y * canvas.width + x) * 4;
+
+                        let alpha = 1.0;
+                        if (distance > outerRadius) {
+                            alpha = 1.0 - ((distance - outerRadius) / aaWidth);
+                        } else if (distance < innerRadius) {
+                            alpha = 1.0 - ((innerRadius - distance) / aaWidth);
+                        }
+                        alpha = Math.max(0, Math.min(1, alpha)); 
+
+                        data[index] = rgb[0];
+                        data[index + 1] = rgb[1];
+                        data[index + 2] = rgb[2];
+                        data[index + 3] = alpha * 255; 
+                    }
+                }
+            }
+            ctx.putImageData(imgData, 0, 0);
+
+            let isDragging = false;
+            function handleColorPick(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left - center;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top - center;
+
+                let angle = Math.atan2(y, x) * (180 / Math.PI);
+                if (angle < 0) angle += 360;
+
+                state[activeCorner].hue = angle; 
+                updateMarkerPosition(activeCorner, angle); 
+                updateColors();
+            }
+
+            canvas.addEventListener('mousedown', (e) => { isDragging = true; handleColorPick(e); });
+            window.addEventListener('mousemove', (e) => { if (isDragging) handleColorPick(e); });
+            window.addEventListener('mouseup', () => isDragging = false);
+            canvas.addEventListener('touchstart', (e) => { isDragging = true; handleColorPick(e); });
+            window.addEventListener('touchmove', (e) => { if (isDragging) handleColorPick(e); });
+            window.addEventListener('touchend', () => isDragging = false);
+        }
+
+        function setupSliderListeners(side) {
+            const satSlider = document.getElementById(`sat-${side}`);
+            const valSlider = document.getElementById(`val-${side}`);
+            const warmSlider = document.getElementById(`warm-${side}`);
+
+            const updateFromSliders = () => {
+                state[side].sat = parseInt(satSlider.value); 
+                state[side].val = parseInt(valSlider.value); 
+                state[side].warmth = parseInt(warmSlider.value);
+                
+                document.getElementById(`txt-sat-${side}`).innerText = `${state[side].sat}%`; 
+                document.getElementById(`txt-val-${side}`).innerText = `${state[side].val}%`;
+                document.getElementById(`txt-warm-${side}`).innerText = state[side].warmth;
+
+                updateColors();
+            };
+
+            satSlider.addEventListener('input', updateFromSliders);
+            valSlider.addEventListener('input', updateFromSliders);
+            warmSlider.addEventListener('input', updateFromSliders);
+        }
+
+        function updateMarkerPosition(side, hue) {
+            const canvasRadius = 75; // 150 / 2
+            const targetRadius = canvasRadius - 2 - (RING_THICKNESS / 2); 
+            
+            const angleRad = hue * (Math.PI / 180);
+            const x = canvasRadius + targetRadius * Math.cos(angleRad);
+            const y = canvasRadius + targetRadius * Math.sin(angleRad);
+
+            const marker = document.getElementById(`marker-${side}`);
+            marker.style.left = `${x}px`;
+            marker.style.top = `${y}px`;
+        }
+
+        function computeColor(side) {
+            const current = state[side];
+            let finalHue = (current.hue - (current.warmth * 0.6)) % 360; 
+            if (finalHue < 0) finalHue += 360;
+
+            let saturation = current.sat;
+            let lightness = (current.val / 100) * (100 - (saturation / 2));
+
+            let r, g, b;
+            const h = finalHue / 360;
+            const s = saturation / 100;
+            const l = lightness / 100;
+
+            if (s === 0) {
+                r = g = b = l; 
+            } else {
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                r = hueToRgbHelper(p, q, h + 1/3);
+                g = hueToRgbHelper(p, q, h);
+                b = hueToRgbHelper(p, q, h - 1/3);
+            }
+
+            if (current.warmth > 0) { 
+                r += (current.warmth / 100) * (1 - r);
+                b -= (current.warmth / 100) * b;
+            } else if (current.warmth < 0) { 
+                b += (Math.abs(current.warmth) / 100) * (1 - b);
+                r -= (Math.abs(current.warmth) / 100) * r;
+            }
+
+            const toHex = x => Math.max(0, Math.min(255, Math.round(x * 255))).toString(16).padStart(2, '0');
+            return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        }
+
+        function hslToRgb(h, s, l) {
+            let r, g, b;
+            if (s === 0) { r = g = b = l; } 
+            else {
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                r = hueToRgbHelper(p, q, h + 1/3);
+                g = hueToRgbHelper(p, q, h);
+                b = hueToRgbHelper(p, q, h - 1/3);
+            }
+            return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+        }
+
+        function hueToRgbHelper(p, q, t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        }
+
+        // Render the 4-corner interpolation pixel grid inside HTML5 Canvas [cite: 19]
+        function draw4CornerGradient() {
+            const canvas = document.getElementById('gradient-preview');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            const imgData = ctx.createImageData(w, h);
+            const data = imgData.data;
+
+            // Parse hex representations into workable integers
+            const parseHex = (hex) => [
+                parseInt(hex.slice(1,3), 16),
+                parseInt(hex.slice(3,5), 16),
+                parseInt(hex.slice(5,7), 16)
+            ];
+
+            const cTL = parseHex(state.tl.hex);
+            const cTR = parseHex(state.tr.hex);
+            const cBL = parseHex(state.bl.hex);
+            const cBR = parseHex(state.br.hex);
+
+            for (let y = 0; y < h; y++) {
+                const percentY = y / (h - 1);
+                for (let x = 0; x < w; x++) {
+                    const percentX = x / (w - 1);
+
+                    // Bilinear interpolation math formulas [cite: 19]
+                    // Interp top row, interp bottom row, then find the intersection pixel channel
+                    const r = (1 - percentY) * ((1 - percentX) * cTL[0] + percentX * cTR[0]) + percentY * ((1 - percentX) * cBL[0] + percentX * cBR[0]);
+                    const g = (1 - percentY) * ((1 - percentX) * cTL[1] + percentX * cTR[1]) + percentY * ((1 - percentX) * cBL[1] + percentX * cBR[1]);
+                    const b = (1 - percentY) * ((1 - percentX) * cTL[2] + percentX * cTR[2]) + percentY * ((1 - percentX) * cBL[2] + percentX * cBR[2]);
+
+                    const idx = (y * w + x) * 4;
+                    data[idx] = r;
+                    data[idx+1] = g;
+                    data[idx+2] = b;
+                    data[idx+3] = 255; // Alpha
+                }
+            }
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        function updateColors() {
+            corners.forEach(c => {
+                state[c].hex = computeColor(c);
+                document.getElementById(`hex-${c}`).innerText = state[c].hex.toUpperCase(); 
+            });
+
+            draw4CornerGradient();
+
+            // Render absolute text readout for user reference 
+            const outputBox = document.getElementById('css-output');
+            outputBox.innerHTML = `<strong>Active Values:</strong> Top-Left: ${state.tl.hex.toUpperCase()} | Top-Right: ${state.tr.hex.toUpperCase()} <br> Bottom-Left: ${state.bl.hex.toUpperCase()} | Bottom-Right: ${state.br.hex.toUpperCase()}<br><span style="color:#a8a8b3; font-size:11px;">(Note: CSS native linear-gradients only support 2 opposite sides. Use the canvas context element code to display 4-corner matrices on web platforms.)</span>`;
+        }
+    </script>
+</body>
+</html>
