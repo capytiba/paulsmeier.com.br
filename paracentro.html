@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>David Pauls Meier</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="mouse-glow"></div>
+
+    <div class="layout-wrapper">
+        
+        <!-- LADO ESQUERDO: Cabeçalho Fixo -->
+        <header class="sidebar_pages">
+            <div>
+                <h1>ParaCentro</h1>
+                <h2>Controle de parâmetros</h2>
+                <p class="bio-pages">
+                    Software para visualizar, editar e comparar os parâmetros dos centros de usinagem Cortesa.
+                </p>
+            </div>
+
+            <!-- Seletor de Idioma -->
+            <div class="lang-selector">
+                <a href="../template.html" class="active">PT</a>
+                <a href="en/template.html">EN</a>
+                <a href="de/template.html">DE</a>
+            </div>
+        </header>
+
+        <!-- LADO DIREITO: Conteúdo Rolável -->
+        <main class="content_pages">
+            
+            <!-- SEÇÃO: SOBRE -->
+            <section id="sobre" class="section-block">
+                <h2 class="mobile-section-title">Sobre</h2>
+                <p class="about-text-pages">
+                    Às vezes precisamos comparar os parâmetros das máquinas para ver se ninguém mudou nada. Como são exportados em XML e é um pouco complicado de ler e achar o que queremos, pedi para uma IA criar esse software. Eu não escrevi nada e quase nem li. Só testei e pedi para fazer melhorias. 
+                </p>
+                    <img src="ParaCentro_Interface.png" alt="ParaCentro Interface" class="pages_image">
+                <p class="about-text-pages">
+                    Esse foi meu primeiro projeto com <i>vibe coding.</i> Depois de 7 iterações o Gemini me entregou algo usável e prático que faz o que eu quero: mostra os parâmetros, permite editar e faz uma comparação entre dois arquivos, destacando as diferenças.
+                </p>
+            </section>
+
+
+        </main>
+    </div>
+
+    <!-- Script para o efeito de brilho no mouse -->
+    <script>
+        const glow = document.querySelector('.mouse-glow');
+        
+        document.body.addEventListener('mousemove', (e) => {
+            // Atualiza as variáveis CSS com a posição X e Y do cursor
+            glow.style.setProperty('--x', `${e.clientX}px`);
+            glow.style.setProperty('--y', `${e.clientY}px`);
+        });
+    </script>
+
+</body>
+</html>
