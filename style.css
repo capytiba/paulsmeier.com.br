@@ -66,8 +66,9 @@ a {
 /* --- Layout Wrapper (Mobile First) --- */
 .layout-wrapper {
     max-width: 1200px;
+    width: 85%;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 1rem 0 0 0;
     position: relative;
     z-index: 40;
 }
@@ -346,9 +347,9 @@ h2 {
     margin-bottom: 2rem;
     position: sticky;
     top: 0;
-    background-color: rgba(15, 23, 42, 0.9); /* Mesma cor do fundo, mas translúcido */
+    background-color: rgba(15, 23, 42, 0.1); /* Mesma cor do fundo, mas translúcido */
     backdrop-filter: blur(8px);
-    padding: 1rem 0;
+    padding: 1rem 100;
     z-index: 50;
 }
 
