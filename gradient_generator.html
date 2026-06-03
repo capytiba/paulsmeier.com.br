@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced 4-Corner Gradient Generator</title>
+    <style>
+        :root {
+            --bg-color: #0f0f11;
+            --card-bg: #16161a;
+            --text-color: #e1e1e6;
+            --border-color: #242429;
+            --input-bg: #1f1f23;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.1s ease;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            margin: 0 0 20px 0;
+            font-weight: 600;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 850px;
+            width: 100%;
+        }
+
+        /* Top Controls: Resizing & Background */
+        .top-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+            background-color: var(--card-bg);
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="number"] {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 4px 8px;
+            border-radius: 4px;
+            width: 70px;
+            font-family: monospace;
+        }
+
+        input[type="color"] {
+            background: none;
+            border: none;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        /* Resizable Canvas Wrapper */
+        .canvas-wrapper {
+            resize: both;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+            align-self: center;
+            max-width: 100%;
+            background: #000;
+        }
+
+        canvas#gradient-preview {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Compact Workspace Grid */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        @media (min-width: 650px) {
+            .workspace {
+                grid-template-columns: 1fr auto 1fr;
+                align-items: center;
+            }
+        }
+
+        /* Centralized Wheel Column */
+        .wheel-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+        }
+
+        canvas#hue-ring {
+            border-radius: 50%;
+            cursor: crosshair;
+        }
+
+        .active-indicator {
+            font-size: 0.85rem;
+            color: #a8a8b3;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* Target Marker Rings */
+        .color-marker {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 2px solid white;
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 4px rgba(0,0,0,0.8);
+            transition: border-color 0.2s;
+        }
+        
+        #marker-tl { border-color: #ff453a; }
+        #marker-tr { border-color: #30d158; }
+        #marker-bl { border-color: #0a84ff; }
+        #marker-br { border-color: #bf5af2; }
+
+        /* Sliders Corner Controls */
+        .controls-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .corner-panel {
+            background: var(--input-bg);
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .corner-panel.active {
+            background: #26262b;
+        }
+        
+        #panel-tl { border-left-color: #ff453a; }
+        #panel-tr { border-left-color: #30d158; }
+        #panel-bl { border-left-color: #0a84ff; }
+        #panel-br { border-left-color: #bf5af2; }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        input[type="text"].hex-input {
+            background: #121214;
+            border: 1px solid var(--border-color);
+            color: #00e676;
+            font-family: monospace;
+            font-size: 0.85rem;
+            width: 65px;
+            padding: 4px;
+            border-radius: 4px;
+            text-align: center;
+            outline: none;
+        }
+
+        input[type="text"].hex-input:focus {
+            border-color: #00e676;
+        }
+
+        .slider-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 10px;
+        }
+
+        .slider-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .slider-row label {
+            font-size: 0.75rem;
+            color: #a8a8b3;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: #2d2d34;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #e1e1e6;
+            cursor: pointer;
+        }
+
+        /* Output Data Table */
+        .output-table {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            width: 100%;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .output-table-row {
+            display: grid;
+            grid-template-columns: 120px 100px 1fr 1fr;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .output-table-row:last-child {
+            border-bottom: none;
+        }
+
+        .output-table-header {
+            background-color: var(--input-bg);
+            font-weight: bold;
+            color: #a8a8b3;
+        }
+
+        .cell {
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .corner-label-cell {
+            font-weight: bold;
+            font-family: system-ui, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Advanced 4-Corner Gradient</h1>
+
+    <div class="container">
+        
+        <div class="top-controls">
+            <div class="control-group">
+                <label>Website Bg:</label>
+                <input type="color" id="bg-color-picker" value="#0f0f11">
+            </div>
+            <div class="control-group">
+                <label>Width:</label>
+                <input type="number" id="canvas-w" value="600">
+                <label>Height:</label>
+                <input type="number" id="canvas-h" value="300">
+            </div>
+        </div>
+
+        <div class="canvas-wrapper" id="canvas-wrapper" style="width: 600px; height: 300px;">
+            <canvas id="gradient-preview" width="600" height="300"></canvas>
+        </div>
+
+        <div class="workspace">
+            
+            <div class="controls-column">
+                <div class="corner-panel active" id="panel-tl" onclick="setActiveCorner('tl')">
+                    <div class="panel-header">
+                        <span style="color:#ff453a;">Top-Left</span>
+                        <input type="text" class="hex-input" id="hex-tl" value="#FF0000" maxlength="7" onclick="event.stopPropagation()">
+                    </div>
+                    <div class="slider-row"><label>Saturation <span id="txt-sat-tl">100%</span></label><input type="range" id="sat-tl" min="0" max="100" value="100" onclick="event.stopPropagation()"></div>
+                    <div class="slider-row"><label>Brightness <span id="txt-val-tl">100%</span></label><input type="range" id="val-tl" min="0" max="100" value="100" onclick="event.stopPropagation()"></div>
+                </div>
+                
+                <div class="corner-panel" id="panel-bl" onclick="setActiveCorner('bl')">
+                    <div class="panel-header">
+                        <span style="color:#0a84ff;">Bottom-Left</span>
+                        <input type="text" class="hex-input" id="hex-bl" value="#00FFFF" maxlength="7" onclick="event.stopPropagation()">
+                    </div>
+                    <div class="slider-row"><label>Saturation <span id="txt-sat-bl">100%</span></label><input type="range" id="sat-bl" min="0" max="100" value="100" onclick="event.stopPropagation()"></div>
+                    <div class="slider-row"><label>Brightness <span id="txt-val-bl">100%</span></label><input type="range" id="val-bl" min="0" max="100" value="100" onclick="event.stopPropagation()"></div>
+                </div>
+            </div>
+
+            <div class="wheel-column">
+                <div class="active-indicator">Editing: <span id="active-title" style="font-weight:bold; color:#ff453a;">Top-Left</span></div>
+                <div class="canvas-container">
+                    <canvas id="hue-ring" width="150" height="150"></canvas>
+                    <div class="color-marker" id="marker-tl"></div>
+                    <div class="color-marker" id="marker-tr"></div>
+                    <div class="color-marker" id="marker-bl"></div>
+                    <div class="color-marker" id="marker-br"></div>
+                </div>
+                <div class="active-indicator" style="font-size:0.75rem;">Click ring to change Hue.<br>Drag canvas to resize.</div>
+            </div>
+
+            <div class="controls-column">
+                <div class="corner-panel" id="panel-tr" onclick="setActiveCorner('tr')">
+                    <div class="panel-header">
+                        <span style="color:#30d158;">Top-Right</span>
+                        <input type="text" class="hex-input" id="hex-tr" value="#00FF00" maxlength="7" onclick="event.stopPropagation()">
+                    </div>
+                    <div class="slider-row"><label>Saturation <span id="txt-sat-tr">100%</span></label><input type="range" id="sat-tr" min="0" max="100" value="100" onclick="event.stopPropagation()"></div>
+                    <div class="slider-row"><label>Brightness <span id="txt-val-tr">100%</span></label><input type="range" id="val-tr" min="0" max="100" value="100" onclick="event.stopPropagation()"></div>
+                </div>
+                
+                <div class="corner-panel" id="panel-br" onclick="setActiveCorner('br')">
+                    <div class="panel-header">
+                        <span style="color:#bf5af2;">Bottom-Right</span>
+                        <input type="text" class="hex-input" id="hex-br" value="#0000FF" maxlength="7" onclick="event.stopPropagation()">
+                    </div>
+                    <div class="slider-row"><label>Saturation <span id="txt-sat-br">100%</span></label><input type="range" id="sat-br" min="0" max="100" value="100" onclick="event.stopPropagation()"></div>
+                    <div class="slider-row"><label>Brightness <span id="txt-val-br">100%</span></label><input type="range" id="val-br" min="0" max="100" value="100" onclick="event.stopPropagation()"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="output-table">
+            <div class="output-table-row output-table-header">
+                <div class="cell">Position</div>
+                <div class="cell">HEX</div>
+                <div class="cell">RGB</div>
+                <div class="cell">HSL</div>
+            </div>
+            <div class="output-table-row" id="row-tl"><div class="cell corner-label-cell" style="color:#ff453a;">Top-Left</div><div class="cell" id="out-hex-tl"></div><div class="cell" id="out-rgb-tl"></div><div class="cell" id="out-hsl-tl"></div></div>
+            <div class="output-table-row" id="row-tr"><div class="cell corner-label-cell" style="color:#30d158;">Top-Right</div><div class="cell" id="out-hex-tr"></div><div class="cell" id="out-rgb-tr"></div><div class="cell" id="out-hsl-tr"></div></div>
+            <div class="output-table-row" id="row-bl"><div class="cell corner-label-cell" style="color:#0a84ff;">Bottom-Left</div><div class="cell" id="out-hex-bl"></div><div class="cell" id="out-rgb-bl"></div><div class="cell" id="out-hsl-bl"></div></div>
+            <div class="output-table-row" id="row-br"><div class="cell corner-label-cell" style="color:#bf5af2;">Bottom-Right</div><div class="cell" id="out-hex-br"></div><div class="cell" id="out-rgb-br"></div><div class="cell" id="out-hsl-br"></div></div>
+        </div>
+
+        <div class="output-table" style="position: relative; margin-top: 16px; padding: 16px; font-family: monospace; color: #00e676; background-color: var(--input-bg);">
+            <button id="copy-btn" style="position: absolute; top: 8px; right: 8px; background: #2d2d34; color: #e1e1e6; border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 0.75rem; transition: background 0.2s;">Copy</button>
+            <div id="js-code-output" style="white-space: pre-wrap; word-break: break-all; margin-top: 10px;"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // Core State
+        const state = {
+            tl: { hue: 0, sat: 100, val: 100, hex: '#ff0000', label: 'Top-Left', color: '#ff453a' },
+            tr: { hue: 120, sat: 100, val: 100, hex: '#00ff00', label: 'Top-Right', color: '#30d158' },
+            bl: { hue: 180, sat: 100, val: 100, hex: '#00ffff', label: 'Bottom-Left', color: '#0a84ff' },
+            br: { hue: 240, sat: 100, val: 100, hex: '#0000ff', label: 'Bottom-Right', color: '#bf5af2' }
+        };
+
+        const corners = ['tl', 'tr', 'bl', 'br'];
+        let activeCorner = 'tl';
+        const RING_THICKNESS = 12;
+
+        // --- Initialization ---
+        initSharedHueRing();
+        setupCanvasResizing();
+        
+        document.getElementById('bg-color-picker').addEventListener('input', (e) => {
+            document.body.style.backgroundColor = e.target.value;
+        });
+
+        corners.forEach(c => {
+            updateMarkerPosition(c, state[c].hue);
+            setupSliderListeners(c);
+            setupHexInputListener(c);
+        });
+        updateColors();
+
+
+        // --- UI Interactions ---
+        function setActiveCorner(cornerId) {
+            activeCorner = cornerId;
+            corners.forEach(c => document.getElementById(`panel-${c}`).classList.remove('active'));
+            document.getElementById(`panel-${cornerId}`).classList.add('active');
+            
+            const titleEl = document.getElementById('active-title');
+            titleEl.innerText = state[cornerId].label;
+            titleEl.style.color = state[cornerId].color;
+        }
+
+        function setupCanvasResizing() {
+            const cwInput = document.getElementById('canvas-w');
+            const chInput = document.getElementById('canvas-h');
+            const preview = document.getElementById('gradient-preview');
+            const wrapper = document.getElementById('canvas-wrapper');
+
+            // When user types numbers
+            const applySize = () => {
+                const w = parseInt(cwInput.value) || 100;
+                const h = parseInt(chInput.value) || 100;
+                wrapper.style.width = `${w}px`;
+                wrapper.style.height = `${h}px`;
+                preview.width = w;
+                preview.height = h;
+                draw4CornerGradient();
+            };
+            cwInput.addEventListener('input', applySize);
+            chInput.addEventListener('input', applySize);
+
+            // When user drags CSS resize handle
+            new ResizeObserver(() => {
+                if(wrapper.clientWidth !== parseInt(cwInput.value) || wrapper.clientHeight !== parseInt(chInput.value)) {
+                    cwInput.value = wrapper.clientWidth;
+                    chInput.value = wrapper.clientHeight;
+                    preview.width = wrapper.clientWidth;
+                    preview.height = wrapper.clientHeight;
+                    draw4CornerGradient();
+                }
+            }).observe(wrapper);
+        }
+
+        function setupSliderListeners(side) {
+            const satSlider = document.getElementById(`sat-${side}`);
+            const valSlider = document.getElementById(`val-${side}`);
+
+            const updateFromSliders = () => {
+                state[side].sat = parseInt(satSlider.value);
+                state[side].val = parseInt(valSlider.value);
+                
+                document.getElementById(`txt-sat-${side}`).innerText = `${state[side].sat}%`;
+                document.getElementById(`txt-val-${side}`).innerText = `${state[side].val}%`;
+                updateColors();
+            };
+
+            satSlider.addEventListener('input', updateFromSliders);
+            valSlider.addEventListener('input', updateFromSliders);
+        }
+
+        // Mathematical reverse-engineering: Read user HEX -> Convert to RGB -> Extract HSV & Hue
+        function setupHexInputListener(side) {
+            const hexInput = document.getElementById(`hex-${side}`);
+            
+            hexInput.addEventListener('input', (e) => {
+                let val = e.target.value.trim();
+                if (/^#[0-9A-Fa-f]{6}$/i.test(val)) {
+                    const rgb = parseHex(val);
+                    const hsv = rgbToHsv(rgb[0], rgb[1], rgb[2]);
+                    
+                    state[side].hue = hsv.h;
+                    state[side].sat = Math.round(hsv.s * 100);
+                    state[side].val = Math.round(hsv.v * 100);
+
+                    // Sync UI
+                    document.getElementById(`sat-${side}`).value = state[side].sat;
+                    document.getElementById(`val-${side}`).value = state[side].val;
+                    document.getElementById(`txt-sat-${side}`).innerText = `${state[side].sat}%`;
+                    document.getElementById(`txt-val-${side}`).innerText = `${state[side].val}%`;
+                    
+                    updateMarkerPosition(side, state[side].hue);
+                    updateColors();
+                }
+            });
+        }
+
+        // --- Math Engine ---
+        function parseHex(hex) {
+            return [
+                parseInt(hex.slice(1,3), 16),
+                parseInt(hex.slice(3,5), 16),
+                parseInt(hex.slice(5,7), 16)
+            ];
+        }
+
+        function rgbToHsv(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            let max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, v = max;
+            let d = max - min;
+            s = max === 0 ? 0 : d / max;
+
+            if (max === min) { h = 0; } 
+            else {
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return { h: h * 360, s: s, v: v };
+        }
+
+        // Convert standard RGB to CSS HSL string for data table
+        function rgbToHslString(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            let max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) { h = s = 0; } 
+            else {
+                let d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+        }
+
+        function hslToRgb(h, s, l) {
+            let r, g, b;
+            if (s === 0) { r = g = b = l; } 
+            else {
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                r = hueToRgbHelper(p, q, h + 1/3);
+                g = hueToRgbHelper(p, q, h);
+                b = hueToRgbHelper(p, q, h - 1/3);
+            }
+            return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+        }
+
+        function hueToRgbHelper(p, q, t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        }
+
+        function computeColor(side) {
+            const current = state[side];
+            let saturation = current.sat;
+            let lightness = (current.val / 100) * (100 - (saturation / 2));
+            const rgb = hslToRgb(current.hue / 360, saturation / 100, lightness / 100);
+            
+            const toHex = x => Math.max(0, Math.min(255, Math.round(x))).toString(16).padStart(2, '0');
+            return `#${toHex(rgb[0])}${toHex(rgb[1])}${toHex(rgb[2])}`;
+        }
+
+
+        // --- Core Rendering ---
+        function initSharedHueRing() {
+            const canvas = document.getElementById('hue-ring');
+            const ctx = canvas.getContext('2d');
+            const center = canvas.width / 2;
+            const outerRadius = center - 2;
+            const innerRadius = outerRadius - RING_THICKNESS;
+            
+            const imgData = ctx.createImageData(canvas.width, canvas.height);
+            const data = imgData.data;
+            const aaWidth = 1.5; 
+
+            for (let x = 0; x < canvas.width; x++) {
+                for (let y = 0; y < canvas.height; y++) {
+                    const dx = x - center;
+                    const dy = y - center;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance >= (innerRadius - aaWidth) && distance <= (outerRadius + aaWidth)) {
+                        let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                        if (angle < 0) angle += 360;
+                        
+                        const rgb = hslToRgb(angle / 360, 1, 0.5);
+                        const index = (y * canvas.width + x) * 4;
+
+                        let alpha = 1.0;
+                        if (distance > outerRadius) {
+                            alpha = 1.0 - ((distance - outerRadius) / aaWidth);
+                        } else if (distance < innerRadius) {
+                            alpha = 1.0 - ((innerRadius - distance) / aaWidth);
+                        }
+                        alpha = Math.max(0, Math.min(1, alpha));
+
+                        data[index] = rgb[0];
+                        data[index + 1] = rgb[1];
+                        data[index + 2] = rgb[2];
+                        data[index + 3] = alpha * 255;
+                    }
+                }
+            }
+            ctx.putImageData(imgData, 0, 0);
+
+            let isDragging = false;
+            function handleColorPick(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left - center;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top - center;
+
+                let angle = Math.atan2(y, x) * (180 / Math.PI);
+                if (angle < 0) angle += 360;
+
+                state[activeCorner].hue = angle;
+                updateMarkerPosition(activeCorner, angle);
+                updateColors();
+            }
+
+            canvas.addEventListener('mousedown', (e) => { isDragging = true; handleColorPick(e); });
+            window.addEventListener('mousemove', (e) => { if (isDragging) handleColorPick(e); });
+            window.addEventListener('mouseup', () => isDragging = false);
+            canvas.addEventListener('touchstart', (e) => { isDragging = true; handleColorPick(e); });
+            window.addEventListener('touchmove', (e) => { if (isDragging) handleColorPick(e); });
+            window.addEventListener('touchend', () => isDragging = false);
+        }
+
+        function updateMarkerPosition(side, hue) {
+            const canvasRadius = 75; 
+            const targetRadius = canvasRadius - 2 - (RING_THICKNESS / 2); 
+            
+            const angleRad = hue * (Math.PI / 180);
+            const x = canvasRadius + targetRadius * Math.cos(angleRad);
+            const y = canvasRadius + targetRadius * Math.sin(angleRad);
+
+            const marker = document.getElementById(`marker-${side}`);
+            marker.style.left = `${x}px`;
+            marker.style.top = `${y}px`;
+        }
+
+        function draw4CornerGradient() {
+            const canvas = document.getElementById('gradient-preview');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            // Skip execution if width/height collapsed to 0
+            if (w === 0 || h === 0) return;
+
+            const imgData = ctx.createImageData(w, h);
+            const data = imgData.data;
+
+            const cTL = parseHex(state.tl.hex);
+            const cTR = parseHex(state.tr.hex);
+            const cBL = parseHex(state.bl.hex);
+            const cBR = parseHex(state.br.hex);
+
+            for (let y = 0; y < h; y++) {
+                const percentY = y / (h - 1 || 1);
+                for (let x = 0; x < w; x++) {
+                    const percentX = x / (w - 1 || 1);
+
+                    const r = (1 - percentY) * ((1 - percentX) * cTL[0] + percentX * cTR[0]) + percentY * ((1 - percentX) * cBL[0] + percentX * cBR[0]);
+                    const g = (1 - percentY) * ((1 - percentX) * cTL[1] + percentX * cTR[1]) + percentY * ((1 - percentX) * cBL[1] + percentX * cBR[1]);
+                    const b = (1 - percentY) * ((1 - percentX) * cTL[2] + percentX * cTR[2]) + percentY * ((1 - percentX) * cBL[2] + percentX * cBR[2]);
+
+                    const idx = (y * w + x) * 4;
+                    data[idx] = r;
+                    data[idx+1] = g;
+                    data[idx+2] = b;
+                    data[idx+3] = 255;
+                }
+            }
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        function updateColors() {
+            corners.forEach(c => {
+                state[c].hex = computeColor(c);
+                
+                // Only update the input text if the user isn't actively typing in it
+                const inputEl = document.getElementById(`hex-${c}`);
+                if (document.activeElement !== inputEl) {
+                    inputEl.value = state[c].hex.toUpperCase();
+                }
+
+                // Parse generated Hex to fill the Data Table mathematically
+                const rgb = parseHex(state[c].hex);
+                document.getElementById(`out-hex-${c}`).innerText = state[c].hex.toUpperCase();
+                document.getElementById(`out-rgb-${c}`).innerText = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+                document.getElementById(`out-hsl-${c}`).innerText = rgbToHslString(rgb[0], rgb[1], rgb[2]);
+            });
+
+            draw4CornerGradient();
+
+            // Generate JavaScript constants for website background
+            const rgbTL = parseHex(state.tl.hex);
+            const rgbTR = parseHex(state.tr.hex);
+            const rgbBL = parseHex(state.bl.hex);
+            const rgbBR = parseHex(state.br.hex);
+
+            const jsOutputString = `            const topColor1 = { r: ${rgbTL[0]}, g: ${rgbTL[1]}, b: ${rgbTL[2]} };\n            const topColor2 = { r: ${rgbTR[0]}, g: ${rgbTR[1]}, b: ${rgbTR[2]} };\n            const bottomColor1 = { r: ${rgbBL[0]}, g: ${rgbBL[1]}, b: ${rgbBL[2]} };\n            const bottomColor2 = { r: ${rgbBR[0]}, g: ${rgbBR[1]}, b: ${rgbBR[2]} };`;
+
+            document.getElementById('js-code-output').innerText = jsOutputString;
+        }
+
+        // Copy Button Logic
+        document.getElementById('copy-btn').addEventListener('click', function() {
+            const codeText = document.getElementById('js-code-output').innerText;
+            
+            navigator.clipboard.writeText(codeText).then(() => {
+                // Provide temporary visual feedback
+                const btn = document.getElementById('copy-btn');
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                btn.style.background = '#30d158'; // Briefly turn it green
+                btn.style.color = '#000';
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = '#2d2d34';
+                    btn.style.color = '#e1e1e6';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        });
+
+
+
+    </script>
+</body>
+</html>

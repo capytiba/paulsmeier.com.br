@@ -144,12 +144,12 @@
                 <!-- Projeto 3 -->
                 <article class="experience-card project-card">
                     <div class="project-image-container">
-                        <img src="image.jpg" alt="Image" class="project-thumb">
+                        <img src="gerador_gradiente.png" alt="Gerador de gradiente" class="project-thumb">
                     </div>
                     <div class="exp-details">
-                        <h3>Projeto por vir</h3>
+                        <h3><a href="gradient_generator.html" class="card-link">Gerador de gradiente</a></h3>
                         <p>
-                            Descrição do projeto ainda por vir.
+                            Eu queria que esse site tivesse um gradiente, então fiz o Gemini criar essa ferramenta para mim.
                         </p>
                     </div>
                 </article>
@@ -215,7 +215,8 @@
             });
         });
         
-        window.addEventListener('scroll', () => {
+        // 1. We wrap all our math inside a named function
+        function updateScrollGradient() {
             // Calculate total scrollable height
             const scrollTop = window.scrollY;
             const docHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -224,15 +225,12 @@
             const scrollFraction = docHeight > 0 ? scrollTop / docHeight : 0;
             
             // Define your color checkpoints
-            // Top Colors (Scroll = 0)
-            const topColor1 = { r: 15, g: 23, b: 42 };    // #0f172a
-            const topColor2 = { r: 30, g: 27, b: 75 };    // #1e1b4b
-            
-            // Bottom Colors (Scroll = 100%) -> Infusing your Industrial Steel Blue
-            const bottomColor1 = { r: 17, g: 24, b: 39 };  // Deeper charcoal/slate
-            const bottomColor2 = { r: 30, g: 58, b: 138 }; // Deep Industrial Blue (#1e3a8a)
+            const topColor1 = { r: 12, g: 0, b: 74 };
+            const topColor2 = { r: 112, g: 0, b: 103 };
+            const bottomColor1 = { r: 102, g: 0, b: 115 };
+            const bottomColor2 = { r: 62, g: 0, b: 161 };
 
-            // Linearly interpolate (lerp) between the top and bottom colors based on scroll
+            // Calculate the new colors
             const r1 = Math.round(topColor1.r + (bottomColor1.r - topColor1.r) * scrollFraction);
             const g1 = Math.round(topColor1.g + (bottomColor1.g - topColor1.g) * scrollFraction);
             const b1 = Math.round(topColor1.b + (bottomColor1.b - topColor1.b) * scrollFraction);
@@ -241,10 +239,17 @@
             const g2 = Math.round(topColor2.g + (bottomColor2.g - topColor2.g) * scrollFraction);
             const b2 = Math.round(topColor2.b + (bottomColor2.b - topColor2.b) * scrollFraction);
 
-            // Update the CSS variables dynamically
+            // Update the CSS variables
             document.body.style.setProperty('--bg-color-1', `rgb(${r1}, ${g1}, ${b1})`);
             document.body.style.setProperty('--bg-color-2', `rgb(${r2}, ${g2}, ${b2})`);
-        });
+        }
+
+        // 2. We tell the browser to run this function every time you scroll
+        window.addEventListener('scroll', updateScrollGradient);
+
+        // 3. THE FIX: We also run it ONCE right now, exactly when the page loads!
+        updateScrollGradient();
+
         
     </script>
 
