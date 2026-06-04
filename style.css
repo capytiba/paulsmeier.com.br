@@ -92,6 +92,10 @@ h2 {
     color: var(--text-main);
 }
 
+p{
+    text-align: justify;
+}
+
 .bio {
     max-width: 400px;
     margin-bottom: 2rem;
@@ -178,10 +182,10 @@ h2 {
 
 .experience-card {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; 
     gap: 0.5rem;
     padding: 1.5rem;
-    border-radius: 8px;
+    border-radius: px;
     transition: background-color 0.3s ease;
     margin-bottom: 1rem;
     /* Pulling it slightly left so the text aligns visually */
@@ -206,6 +210,7 @@ h2 {
     letter-spacing: 0.05em;
     color: var(--text-muted);
     margin-top: 0.25rem;
+    text-align: center;
 }
 
 .exp-details h3 {
@@ -221,6 +226,76 @@ h2 {
 /* --- Efeito de Brilho do Mouse (Mobile: Oculto) --- */
 .mouse-glow {
     display: none; 
+}
+
+/* --- Títulos das seções para Mobile --- */
+.mobile-section-title {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+    position: sticky;
+    top: 0;
+    background-color: transparent; /* rgba(15, 23, 42, 0.1); */ /* Mesma cor do fundo, mas translúcido */
+    backdrop-filter: blur(8px);
+    padding: 1rem 100;
+    z-index: 50;
+}
+
+/* Create the lines */
+.mobile-section-title::before,
+.mobile-section-title::after {
+    content: "";
+    flex: 1; 
+    height: 2px; /* Thickness of your middle line */
+    background-color: #ccc; /* Color of the line */  
+}
+
+/* Add some spacing around the text */
+.mobile-section-title::before {
+  margin-right: 15px; /* Space between left line and text */
+}
+
+.mobile-section-title::after {
+  margin-left: 15px; /* Space between right line and text */
+}/* --- Títulos das seções para Mobile --- */
+.mobile-section-title {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+    position: sticky;
+    top: 0;
+    background-color: transparent; /* rgba(15, 23, 42, 0.1); */ /* Mesma cor do fundo, mas translúcido */
+    backdrop-filter: blur(8px);
+    padding: 1rem 100;
+    z-index: 50;
+}
+
+/* Create the lines */
+.mobile-section-title::before,
+.mobile-section-title::after {
+    content: "";
+    flex: 1; 
+    height: 2px; /* Thickness of your middle line */
+    background-color: #ccc; /* Color of the line */  
+}
+
+/* Add some spacing around the text */
+.mobile-section-title::before {
+  margin-right: 15px; /* Space between left line and text */
+}
+
+.mobile-section-title::after {
+  margin-left: 15px; /* Space between right line and text */
 }
 
 /* --- Desktop Layout (The Magic Split Screen) --- */
@@ -288,8 +363,13 @@ h2 {
     }
 
     .experience-card {
-        grid-template-columns: 1fr 3fr;
+        grid-template-columns: 1fr 4fr;
         gap: 1rem;
+    }
+
+    
+    .mobile-section-title {
+        display: none;
     }
 
 
@@ -322,6 +402,7 @@ h2 {
 /* --- Ajustes do Card de Projeto (Imagem à esquerda) --- */
 .project-image-container {
     padding-top: 0.25rem;
+    text-align: center;
 }
 
 .project-thumb {
@@ -337,28 +418,6 @@ h2 {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* --- Títulos das seções para Mobile --- */
-.mobile-section-title {
-    display: block;
-    font-size: 1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 2rem;
-    position: sticky;
-    top: 0;
-    background-color: rgba(15, 23, 42, 0.1); /* Mesma cor do fundo, mas translúcido */
-    backdrop-filter: blur(8px);
-    padding: 1rem 100;
-    z-index: 50;
-}
-
-/* Esconde os títulos das seções no Desktop (já que temos o menu lateral) */
-@media (min-width: 1024px) {
-    .mobile-section-title {
-        display: none;
-    }
-}
 
 /*
 .atkinson-hyperlegible-regular {
